@@ -1,0 +1,11 @@
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+	name = Kotmin
+	email = 70173732+Kotmin@users.noreply.github.com
+[rerere]
+	enabled = true
+[gitbutler]
+	signCommits = true
+[alias]
+	staash = stash --all
