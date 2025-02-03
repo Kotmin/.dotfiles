@@ -26,7 +26,7 @@ Each directory inside `.dotfiles/` represents a category (e.g., `git`, `zsh`, `t
 ├── tmux/
 │   ├── .tmux.conf
 └── vim/
-    ├── .config/nvim/
+    ├── .config/vim/
         ├── init.vim
 ```
 
