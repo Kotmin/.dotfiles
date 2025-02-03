@@ -38,7 +38,7 @@ This ensures that subdirectories (e.g., `.oh-my-zsh`) are correctly symlinked in
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone --recursive https://github.com/Kotmin/.dotfiles.git~/.dotfiles
+git clone --recursive https://github.com/Kotmin/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
