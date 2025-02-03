@@ -3,9 +3,44 @@
 # Please adapt and uncomment the following lines:
 	name = Kotmin
 	email = 70173732+Kotmin@users.noreply.github.com
+
+
+[init]
+    defaultBranch = main
+
 [rerere]
 	enabled = true
+	
 [gitbutler]
 	signCommits = true
+
+[core]
+    editor = vim
+
 [alias]
 	staash = stash --all
+	serve = !git daemon --reuseaddr --verbose --base-path=. --export-all ./.git
+    unstage = reset HEAD
+    lol = log --pretty=oneline --abbrev-commit --graph --decorate
+    branches = !git-branches
+    st = status
+	plog = log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset'
+    pristine = !git reset --hard && git clean -dff
+
+[pull]
+    rebase = true
+
+[push]
+    autoSetupRemote = true
+
+[color]
+    ui = true
+
+[help]
+    autocorrect = 1
+
+
+[includeIf "gitdir:/Coding/"]
+    path = ~/.dotfiles/git/Coding/.gitconfig
+[includeIf "gitdir:/Work/"]
+    path = ~/.dotfiles/git/Work/.gitconfig
