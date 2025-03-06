@@ -149,7 +149,8 @@ sudo mv terraform /usr/local/bin/ && \
 rm -f terraform_${TF_VERSION}_${OS}_${ARCH}.zip terraform_${TF_VERSION}_SHA256SUMS && \
 terraform -version || { echo "❌ Checksum failed! Cleaning up."; rm -f terraform_${TF_VERSION}_${OS}_${ARCH}.zip terraform_${TF_VERSION}_SHA256SUMS; exit 1; }
 
-
+# cp key if present
+cat ~/.ssh/id_ed25519.pub | clip
 
 ```
 
