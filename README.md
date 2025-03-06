@@ -97,6 +97,65 @@ Have a cool tweak? Feel free to submit a PR or open an issue!
 
 ---
 
+
+## Base command set
+```bash
+ssh-keygen -t ed25519 -C "70173732+Kotmin@users.noreply.github.com"
+# use rsa instead if not supported
+sudo apt update
+sudo apt upgrade
+
+#  curl -fsSL https://get.docker.com -o get-docker.sh
+#  sudo sh get-docker.sh
+
+curl -fsSL https://get.docker.com | sh
+sudo systemctl enable --now docker
+
+docker --version
+sudo usermod -aG docker $USER
+newgrp docker
+
+## DOCKER COMPOSE
+sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+## gpu support section if needed!!!
+
+sudo systemctl restart docker
+
+
+# k8n
+# curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)/kubectl" && \
+# sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+# rm kubectl && kubectl version --client
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)/kubectl" && \
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)/kubectl.sha256" && \
+echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status && \
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+rm -f kubectl kubectl.sha256 && \
+kubectl version --client || { echo "❌ Checksum failed! Cleaning up."; rm -f kubectl kubectl.sha256; exit 1; }
+
+# TerraForm
+
+TF_VERSION=$(curl -sL https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r .tag_name | sed 's/v//') && \
+ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') && \
+OS=$(uname -s | tr '[:upper:]' '[:lower:]') && \
+curl -LO "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_${OS}_${ARCH}.zip" && \
+curl -LO "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_SHA256SUMS" && \
+grep "terraform_${TF_VERSION}_${OS}_${ARCH}.zip" terraform_${TF_VERSION}_SHA256SUMS | sha256sum --check --status && \
+unzip terraform_${TF_VERSION}_${OS}_${ARCH}.zip && \
+sudo mv terraform /usr/local/bin/ && \
+rm -f terraform_${TF_VERSION}_${OS}_${ARCH}.zip terraform_${TF_VERSION}_SHA256SUMS && \
+terraform -version || { echo "❌ Checksum failed! Cleaning up."; rm -f terraform_${TF_VERSION}_${OS}_${ARCH}.zip terraform_${TF_VERSION}_SHA256SUMS; exit 1; }
+
+
+
+```
+
+
+---
+
 ## 📜 License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
