@@ -151,6 +151,8 @@ terraform -version || { echo "❌ Checksum failed! Cleaning up."; rm -f terrafor
 
 # cp key if present
 cat ~/.ssh/id_ed25519.pub | clip
+ssh -T git@github.com
+
 
 ```
 
