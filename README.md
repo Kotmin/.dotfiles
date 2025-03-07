@@ -125,16 +125,17 @@ sudo systemctl restart docker
 
 
 # k8n
-# curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)/kubectl" && \
-# sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
-# rm kubectl && kubectl version --client
+ARCH=$(uname -m)
+if [[ "$ARCH" == "x86_64" ]]; then ARCH="amd64"; elif [[ "$ARCH" == "aarch64" ]]; then ARCH="arm64"; fi
 
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)/kubectl" && \
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)/kubectl.sha256" && \
-echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status && \
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$ARCH/kubectl" && \
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$ARCH/kubectl.sha256" && \
+echo "$(cat kubectl.sha256)" kubectl | sha256sum --check --status && \
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
 rm -f kubectl kubectl.sha256 && \
 kubectl version --client || { echo "❌ Checksum failed! Cleaning up."; rm -f kubectl kubectl.sha256; exit 1; }
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+
 
 # TerraForm
 
