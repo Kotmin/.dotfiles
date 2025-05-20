@@ -105,6 +105,8 @@ ssh-keygen -t ed25519 -C "70173732+Kotmin@users.noreply.github.com"
 sudo apt update
 sudo apt upgrade
 
+sudo apt  install curl
+
 #  curl -fsSL https://get.docker.com -o get-docker.sh
 #  sudo sh get-docker.sh
 
