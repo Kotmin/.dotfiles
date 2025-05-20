@@ -130,6 +130,7 @@ sudo systemctl restart docker
 ARCH=$(uname -m)
 if [[ "$ARCH" == "x86_64" ]]; then ARCH="amd64"; elif [[ "$ARCH" == "aarch64" ]]; then ARCH="arm64"; fi
 
+# something is wrong with this chain of commands, one by one works fine
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$ARCH/kubectl" && \
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$ARCH/kubectl.sha256" && \
 echo "$(cat kubectl.sha256)" kubectl | sha256sum --check --status && \
