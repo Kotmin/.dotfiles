@@ -107,6 +107,7 @@ sudo apt upgrade
 
 sudo apt install -y git
 sudo apt install -y curl
+sudo apt install -y vim
 
 #  curl -fsSL https://get.docker.com -o get-docker.sh
 #  sudo sh get-docker.sh
