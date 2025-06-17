@@ -105,6 +105,9 @@ ssh-keygen -t ed25519 -C "70173732+Kotmin@users.noreply.github.com"
 sudo apt update
 sudo apt upgrade
 
+mkdir ~/Coding
+mkdir ~/Work
+
 sudo apt install -y git
 sudo apt install -y curl
 sudo apt install -y vim
