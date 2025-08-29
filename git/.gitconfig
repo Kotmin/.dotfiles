@@ -26,12 +26,52 @@
     st = status
 	plog = log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset'
     pristine = !git reset --hard && git clean -dff
+    smu = submodule update --init --recursive
+    sms = submodule status
+    sma = submodule add
 
 [pull]
     rebase = true
+    recurseSubmodules = on-demand
 
 [push]
     autoSetupRemote = true
+    recurseSubmodules = on-demand
+    followTags = true
+
+[fetch]
+    recurseSubmodules = on-demand
+    parallel = 8
+    fsckObjects = true 
+
+[transfer]
+    fsckObjects = true
+
+[submodule]
+    recurse = true
+    fetchJobs = 4
+
+[push]
+    recurseSubmodules = on-demand
+    followTags = true
+
+[checkout]
+    recurseSubmodules = true
+
+[switch]
+    recurseSubmodules = true
+
+[merge]
+    recurseSubmodules = on-demand
+
+[rebase]
+    autoStash = true 
+
+[status]
+    submoduleSummary = true
+
+[diff]
+    submodule = log
 
 [color]
     ui = true
