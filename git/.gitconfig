@@ -80,6 +80,13 @@
     autocorrect = 1
 
 
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+
+
 [includeIf "gitdir:/Coding/"]
     path = ~/.dotfiles/git/Coding/.gitconfig
 [includeIf "gitdir:/Work/"]
