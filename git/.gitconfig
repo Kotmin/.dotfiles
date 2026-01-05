@@ -24,6 +24,10 @@
 [gitbutler]
 	signCommits = true
 
+[maintenance]
+    auto = false
+    strategy = incremental
+
 [core]
     editor = vim
 
