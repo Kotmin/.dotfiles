@@ -1,6 +1,6 @@
   1 # CLAUDE.md
   2 
-  3 This file provides guidance to Claude Code (claude.ai/code) when working wit    h code in this repository.
+  3 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
   4 
   5 ## Project Overview
   6 
