@@ -1,0 +1,8 @@
+alias ll='ls -lah'
+alias la='ls -A'
+alias gs='git status'
+alias gd='git diff'
+alias gl='git log --oneline --graph --decorate'
+alias python='python3'
+alias g='grep'
+alias cr='claude --dangerously-skip-permissions'
