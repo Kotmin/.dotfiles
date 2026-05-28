@@ -116,6 +116,7 @@ sudo apt install -y bzip2 tar
 
 
 sudo apt install -y tmux
+sudo apt install -y make gcc perl
 
 
 
