@@ -113,6 +113,10 @@ sudo apt install -y curl
 sudo apt install -y vim
 sudo apt install -y jq
 
+sudo apt install -y tmux
+
+
+
 #  curl -fsSL https://get.docker.com -o get-docker.sh
 #  sudo sh get-docker.sh
 
