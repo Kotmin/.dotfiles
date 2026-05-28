@@ -112,6 +112,8 @@ sudo apt install -y git
 sudo apt install -y curl
 sudo apt install -y vim
 sudo apt install -y jq
+sudo apt install -y bzip2 tar
+
 
 sudo apt install -y tmux
 
