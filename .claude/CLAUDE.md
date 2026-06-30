@@ -14,5 +14,5 @@ Constraints:
 - Write self-documenting code instead of adding explanatory comments
 
 # Git
-
+- When using subagents, subprocesses, agent teams you can use git worktrees, main thread should work as a branch master to handle merges, one instance of branch master is mandatory
 - Don't mention Claude in the git commit messages.
