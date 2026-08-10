@@ -18,4 +18,5 @@ Constraints:
 
 # Git
 - When using subagents, subprocesses, agent teams you can use git worktrees, main thread should work as a branch master to handle merges, one instance of branch master is mandatory
+- Multiple agents on same branch/filesystem: commit only files you yourself recently changed, never blanket-stage, or you'll ship another agent's stale sub-version.
 - Don't mention Claude in the git commit messages.
