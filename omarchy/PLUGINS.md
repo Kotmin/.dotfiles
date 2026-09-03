@@ -179,6 +179,44 @@ installs + enables on every run, idempotently. The whole step is skipped when
 the `omarchy` CLI is absent, so the list stays safe in the shared repo and is a
 **no-op on Ubuntu / plain Arch**. Add a URL, re-run `./omarchy/adapt.sh`.
 
+### Authored in this repo
+
+Local plugins live under `omarchy/plugins/<id>/` (each a normal plugin dir with
+its own `manifest.json`). `adapt.sh` symlinks every such dir into
+`~/.config/omarchy/plugins/`, runs `omarchy plugin enable`, and — only if the
+widget id has never appeared in `~/.config/omarchy/shell.json` — drops it on the
+**right** of the bar once. The bar *layout* itself is user-owned (like
+`~/.bashrc`) and is deliberately not tracked here; move widgets around with
+`omarchy bar move <id> --section <left|center|right> --index N` and that sticks
+in `shell.json`.
+
+| Plugin | id | What |
+|--------|----|------|
+| System monitor | `kotmin.sysmon` | Bar widget: CPU %, RAM used/total (GiB), live network rate with a sparkline, and free space on `/`. Left-click opens `btop`, middle-click forces a sample. Settings in its `shell.json` entry: `intervalMs` (default 2000), `segments` (default `"cpu mem net disk"`). Sampler is `sample.sh` (reads `/proc/stat`, `/proc/meminfo`, `df`, `/proc/net/dev`); rendering is `BarWidget.qml`. |
+| Agents (customized) | `kotmin.agents` | Clone of the built-in `omarchy.agents` widget with a readability pass (higher-contrast secondary text, thicker meters, larger limit/day numbers). Cloning switched the bar to this id. Diff it against `omarchy.agents` upstream to see the tweaks. |
+
+To add another: create `omarchy/plugins/<id>/` with a `manifest.json` + entry
+QML, re-run `./omarchy/adapt.sh`. Edit in place — the live path is a symlink
+back to the repo, and the shell hot-reloads plugin code on save.
+
+### Idle / screensaver defaults
+
+`adapt.sh` also enforces a personal desktop default on Omarchy: **no auto
+screensaver, no auto screen-lock**.
+
+- Screensaver: sets the `screensaver-off` toggle (`omarchy toggle
+  screensaver-off on`) — a flag file `omarchy-launch-screensaver` obeys.
+- Auto-lock: Omarchy has no "disabled" value for `idle.lock`, so the script
+  pushes `idle.lock` and `idle.screensaver` in `~/.config/omarchy/shell.json`
+  out to `604800` (7 days; also kept under the shell Timer's 2^31 ms ceiling).
+  It only rewrites them while they are still at Omarchy's stock `150` / `300`,
+  so a deliberate later change sticks.
+
+To restore stock behaviour: `omarchy toggle screensaver-off off` and set
+`idle` back to `{ "screensaver": 150, "lock": 300 }` in `shell.json`. For a
+temporary "never sleep" instead, `omarchy toggle idle stay-awake` (adds a bar
+indicator; also inhibits DPMS).
+
 ### Wanted
 
 | Plugin | Status | Notes |

@@ -8,6 +8,8 @@
 # Always runs (all guarded, all no-ops when not applicable):
 #   - patch ~/.bashrc to source ~/.bash_aliases (Omarchy doesn't; Ubuntu does)
 #   - install + enable the Omarchy shell plugins in OMARCHY_PLUGINS (Omarchy only)
+#   - symlink + enable local shell plugins from omarchy/plugins/ (Omarchy only)
+#   - idle defaults: no auto screensaver, no auto screen-lock (Omarchy only)
 #
 # Background + full task list: ../intent.md
 # Plugin / tooling recommendations: ./PLUGINS.md
@@ -170,6 +172,97 @@ install_omarchy_plugins(){
   return 0
 }
 
+# --- 3c. always (Omarchy only): link + enable repo-local shell plugins -----
+# Plugins authored in this repo live under omarchy/plugins/<id>/ (each with its
+# own manifest.json). Symlink them into ~/.config/omarchy/plugins/ so the shell
+# scanner finds them while the source of truth stays here. This is for code you
+# already own and review; `omarchy plugin add` (OMARCHY_PLUGINS above) is for
+# third-party git repos. The bar *layout* (shell.json) is user-owned like
+# ~/.bashrc and is not tracked here — we only make sure the widget is available
+# and drop it on the bar once if the layout has never seen it.
+LOCAL_PLUGINS_DIR="$DOTFILES/omarchy/plugins"
+link_local_plugins(){
+  command -v omarchy >/dev/null 2>&1 || { c_skip "no omarchy CLI - skipping local plugins"; return 0; }
+  [[ -d $LOCAL_PLUGINS_DIR ]] || { c_skip "no omarchy/plugins/ - nothing to link"; return 0; }
+  local dest="$HOME/.config/omarchy/plugins" src id link cfg
+  cfg="$HOME/.config/omarchy/shell.json"
+  run "mkdir -p '$dest'"
+  for src in "$LOCAL_PLUGINS_DIR"/*/; do
+    [[ -f ${src}manifest.json ]] || continue
+    src="${src%/}"; id="${src##*/}"; link="$dest/$id"
+    if [[ -L $link && "$(readlink -f "$link")" == "$(readlink -f "$src")" ]]; then
+      c_ok "local plugin linked: $id"
+    elif [[ -e $link && ! -L $link ]]; then
+      c_warn "$link exists and is not a symlink - leaving it alone"; continue
+    else
+      run "ln -sfn '$src' '$link'"
+      c_ok "linked $id"
+    fi
+    (( DRY )) && continue
+    omarchy plugin enable "$id" >/dev/null 2>&1 || true
+    if [[ -f $cfg ]] && ! grep -q "\"$id\"" "$cfg"; then
+      omarchy bar put "$id" --section right >/dev/null 2>&1 && c_ok "added $id to the bar (right)" || true
+    fi
+  done
+  command -v omarchy-shell >/dev/null 2>&1 && run "omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true"
+  return 0
+}
+
+# --- 3d. always (Omarchy only): idle defaults - no screensaver, no auto-lock
+# Personal default: the machine should never blank to the screensaver or lock
+# itself on idle. Two independent mechanisms:
+#   * screensaver -> the dedicated `screensaver-off` toggle flag, honored by
+#     omarchy-launch-screensaver.
+#   * auto-lock   -> Omarchy has no real "disabled" value for idle.lock, so push
+#     idle.lock (and idle.screensaver) far out in shell.json. 604800s = 7 days;
+#     it must also stay under 2^31 ms or the shell's Timer interval overflows.
+# Only rewrites the timeouts when they are still at Omarchy's stock 150/300, so a
+# later deliberate choice (or a re-run) is left untouched. shell.json is
+# user-owned (like ~/.bashrc) and not stowed; this patches it in place with a backup.
+OMARCHY_IDLE_NEVER=604800
+omarchy_idle_off(){
+  command -v omarchy >/dev/null 2>&1 || { c_skip "no omarchy CLI - skipping idle defaults"; return 0; }
+
+  if omarchy-toggle-enabled screensaver-off 2>/dev/null; then
+    c_ok "screensaver already disabled"
+  else
+    run "omarchy-toggle screensaver-off on"
+    c_ok "screensaver disabled"
+  fi
+
+  local cfg="$HOME/.config/omarchy/shell.json"
+  [[ -f $cfg ]] || { c_skip "no shell.json yet - skipping idle timeouts"; return 0; }
+  if (( DRY )); then
+    c_skip "would set idle.screensaver/idle.lock -> $OMARCHY_IDLE_NEVER in shell.json (only if still 150/300)"
+    return 0
+  fi
+  local out
+  out=$(python3 - "$cfg" "$OMARCHY_IDLE_NEVER" "$TS" <<'PYEOF'
+import json, shutil, sys
+cfg, never, ts = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+d = json.load(open(cfg))
+idle = d.get("idle") or {}
+before = dict(idle)
+if idle.get("screensaver") in (None, 150): idle["screensaver"] = never
+if idle.get("lock") in (None, 300): idle["lock"] = never
+if idle != before:
+    shutil.copy2(cfg, cfg + ".bak-" + ts)
+    d["idle"] = idle
+    json.dump(d, open(cfg, "w"), indent=2)
+    print("updated")
+else:
+    print("unchanged")
+PYEOF
+)
+  if [[ $out == updated ]]; then
+    c_ok "idle timeouts pushed out (backup: $cfg.bak-$TS)"
+    run "omarchy restart shell >/dev/null 2>&1 || true"
+  else
+    c_ok "idle timeouts already customized - left as-is"
+  fi
+  return 0
+}
+
 # --- 4. --install: baseline CLI tools --------------------------------------
 # Most are already in Omarchy. zsh/vim only if you opt in.
 BASELINE=(git curl jq tmux ripgrep fd bat eza zoxide fzf stow neovim mise)
@@ -250,6 +343,8 @@ main(){
   preflight
   fix_bashrc
   install_omarchy_plugins
+  link_local_plugins
+  omarchy_idle_off
   if (( DO_INSTALL ));     then install_tools;   fi
   if (( DO_STOW ));        then stow_pkgs;       fi
   if (( DO_UNSTOW_FZF ));  then unstow_fzf;      fi

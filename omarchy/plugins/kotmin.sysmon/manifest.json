@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "kotmin.sysmon",
+  "name": "System monitor",
+  "version": "1.0.0",
+  "author": "kotmin",
+  "license": "MIT",
+  "description": "CPU load, RAM used/total, live network rate with sparkline, and free disk on /",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "System monitor",
+    "description": "CPU %, RAM used/total in GiB, network throughput with a sparkline, and free space on / — click to open btop.",
+    "category": "System",
+    "aliases": ["sysmon", "resources"],
+    "allowMultiple": false,
+    "defaults": {
+      "intervalMs": 2000,
+      "segments": "cpu mem net disk"
+    },
+    "schema": [
+      { "key": "intervalMs", "type": "integer", "label": "Sample interval (ms)", "min": 1000, "max": 10000, "step": 500, "defaultValue": 2000 },
+      { "key": "segments", "type": "string", "label": "Segments to show", "defaultValue": "cpu mem net disk", "description": "Space-separated subset of: cpu mem net disk" }
+    ]
+  }
+}
