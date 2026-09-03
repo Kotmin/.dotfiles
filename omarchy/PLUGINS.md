@@ -217,6 +217,16 @@ To restore stock behaviour: `omarchy toggle screensaver-off off` and set
 temporary "never sleep" instead, `omarchy toggle idle stay-awake` (adds a bar
 indicator; also inhibits DPMS).
 
+### Branding
+
+Personalized Omarchy branding is tracked under `omarchy/branding/` and
+symlinked into `~/.config/omarchy/branding/` by `adapt.sh` (real files are
+backed up first).
+
+| File | What |
+|------|------|
+| `screensaver.txt` | ASCII banner the screensaver animates via `ttfx` (KOTMIN + groovy-tech-cat + GitHub / site / YouTube links). Edit with `omarchy branding screensaver text`; preview with `omarchy-launch-screensaver force`; `omarchy branding screensaver reset` restores the stock Omarchy logo. Note: the screensaver is disabled on idle here (see above), so it only runs when launched by hand. |
+
 ### Wanted
 
 | Plugin | Status | Notes |

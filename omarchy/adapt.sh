@@ -10,6 +10,7 @@
 #   - install + enable the Omarchy shell plugins in OMARCHY_PLUGINS (Omarchy only)
 #   - symlink + enable local shell plugins from omarchy/plugins/ (Omarchy only)
 #   - idle defaults: no auto screensaver, no auto screen-lock (Omarchy only)
+#   - symlink repo-tracked branding files into ~/.config/omarchy/branding/ (Omarchy only)
 #
 # Background + full task list: ../intent.md
 # Plugin / tooling recommendations: ./PLUGINS.md
@@ -263,6 +264,34 @@ PYEOF
   return 0
 }
 
+# --- 3e. always (Omarchy only): repo-tracked branding files --------------
+# Personalized Omarchy branding (screensaver banner, etc.) tracked under
+# omarchy/branding/ and symlinked into ~/.config/omarchy/branding/, so
+# `omarchy branding screensaver ...` edits write straight back to the repo.
+# A pre-existing real file is backed up before it is replaced with the link.
+OMARCHY_BRANDING_DIR="$DOTFILES/omarchy/branding"
+link_omarchy_branding(){
+  command -v omarchy >/dev/null 2>&1 || { c_skip "no omarchy CLI - skipping branding"; return 0; }
+  [[ -d $OMARCHY_BRANDING_DIR ]] || { c_skip "no omarchy/branding/ - nothing to link"; return 0; }
+  local dest="$HOME/.config/omarchy/branding" src name link
+  run "mkdir -p '$dest'"
+  for src in "$OMARCHY_BRANDING_DIR"/*; do
+    [[ -f $src ]] || continue
+    name="${src##*/}"; link="$dest/$name"
+    if [[ -L $link && "$(readlink -f "$link")" == "$(readlink -f "$src")" ]]; then
+      c_ok "branding linked: $name"
+    elif [[ -e $link && ! -L $link ]]; then
+      (( DRY )) || cp -a "$link" "$link.bak-$TS"
+      run "ln -sfn '$src' '$link'"
+      c_ok "linked $name (backup: $link.bak-$TS)"
+    else
+      run "ln -sfn '$src' '$link'"
+      c_ok "linked $name"
+    fi
+  done
+  return 0
+}
+
 # --- 4. --install: baseline CLI tools --------------------------------------
 # Most are already in Omarchy. zsh/vim only if you opt in.
 BASELINE=(git curl jq tmux ripgrep fd bat eza zoxide fzf stow neovim mise)
@@ -345,6 +374,7 @@ main(){
   install_omarchy_plugins
   link_local_plugins
   omarchy_idle_off
+  link_omarchy_branding
   if (( DO_INSTALL ));     then install_tools;   fi
   if (( DO_STOW ));        then stow_pkgs;       fi
   if (( DO_UNSTOW_FZF ));  then unstow_fzf;      fi
