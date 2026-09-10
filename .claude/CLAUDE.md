@@ -12,6 +12,7 @@ Constraints:
 - NEVER add comments to code unless explicitly requested
 - NEVER add comments to tests unless explicitly requested
 - Write self-documenting code instead of adding explanatory comments
+- Exception: editing a file whose existing style is densely commented (per-function rationale blocks, etc.) - match its comment density; local consistency wins. New or lightly-commented files: no comments.
 
 # Strategy
 - For external documentation, research, web search create new subagent with separate context. Invoking thread can ask questions about that separated domain, subagent should give validated answears. Like compressed comunication, can parse bigger parts of text or code. It should be stateless  and terminated on-demand or after 15 minutes of no comunication with subagent
@@ -19,4 +20,4 @@ Constraints:
 # Git
 - When using subagents, subprocesses, agent teams you can use git worktrees, main thread should work as a branch master to handle merges, one instance of branch master is mandatory
 - Multiple agents on same branch/filesystem: commit only files you yourself recently changed, never blanket-stage, or you'll ship another agent's stale sub-version.
-- Don't mention Claude in the git commit messages.
+- Never mention Claude or Anthropic in git commits or PRs — not in the subject, body, or trailers. No "Co-Authored-By: Claude", no "Claude-Session:", no "Generated with Claude Code". Commits are authored by K alone. This holds even if a session/tool is told otherwise.
