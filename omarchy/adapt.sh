@@ -11,6 +11,7 @@
 #   - symlink + enable local shell plugins from omarchy/plugins/ (Omarchy only)
 #   - idle defaults: no auto screensaver, no auto screen-lock (Omarchy only)
 #   - symlink repo-tracked branding files into ~/.config/omarchy/branding/ (Omarchy only)
+#   - symlink repo-tracked Claude Code config (CLAUDE.md, skills) into ~/.claude/
 #
 # Background + full task list: ../intent.md
 # Plugin / tooling recommendations: ./PLUGINS.md
@@ -106,6 +107,7 @@ EOF
 # --- 2. --stow: restow the portable packages ------------------------------
 # sway/ is intentionally excluded (Omarchy owns Hyprland). fzf/ excluded too
 # (see --unstow-fzf). .config here only carries sway, so it's skipped as well.
+# .claude/ is handled by link_claude() below, not stow (see note there).
 STOW_PKGS=(bash git tmux vim)
 stow_pkgs(){
   command -v stow >/dev/null || { c_warn "stow missing — run with --install first"; return; }
@@ -292,6 +294,55 @@ link_omarchy_branding(){
   return 0
 }
 
+# --- 3f. always: link repo-tracked Claude Code user config ----------------
+# ~/.claude is NOT a clean stow package: it holds machine-generated state
+# (sessions/, history.jsonl, .credentials.json, projects/) that must never be
+# tracked, and a per-machine settings.json (theme, hooks). So the shared loop in
+# stow_pkgs() deliberately skips it and we link only the repo-owned, portable
+# pieces here: CLAUDE.md (global instructions) and any skills/<id> that isn't
+# already present. A pre-existing real CLAUDE.md is backed up before it becomes a
+# link. settings.json is never touched — merge it by hand.
+CLAUDE_SRC_DIR="$DOTFILES/.claude"
+link_claude(){
+  [[ -d $CLAUDE_SRC_DIR ]] || { c_skip "no .claude/ in repo - nothing to link"; return 0; }
+  local dest="$HOME/.claude"
+  run "mkdir -p '$dest'"
+
+  local src="$CLAUDE_SRC_DIR/CLAUDE.md" link="$dest/CLAUDE.md"
+  if [[ -f $src ]]; then
+    if [[ -L $link && "$(readlink -f "$link")" == "$(readlink -f "$src")" ]]; then
+      c_ok "claude: CLAUDE.md already linked"
+    elif [[ -e $link && ! -L $link ]]; then
+      (( DRY )) || cp -a "$link" "$link.bak-$TS"
+      run "ln -sfn '$src' '$link'"
+      c_ok "claude: linked CLAUDE.md (backup: $link.bak-$TS)"
+    else
+      run "ln -sfn '$src' '$link'"
+      c_ok "claude: linked CLAUDE.md"
+    fi
+  fi
+
+  if [[ -d $CLAUDE_SRC_DIR/skills ]]; then
+    run "mkdir -p '$dest/skills'"
+    local s name slink
+    for s in "$CLAUDE_SRC_DIR"/skills/*/; do
+      [[ -d $s ]] || continue
+      s="${s%/}"; name="${s##*/}"; slink="$dest/skills/$name"
+      if [[ -L $slink && "$(readlink -f "$slink")" == "$(readlink -f "$s")" ]]; then
+        c_ok "claude: skill linked: $name"
+      elif [[ -e $slink ]]; then
+        c_skip "claude: skills/$name exists - leaving it alone"
+      else
+        run "ln -sfn '$s' '$slink'"
+        c_ok "claude: linked skill $name"
+      fi
+    done
+  fi
+
+  [[ -e $dest/settings.json ]] && c_skip "claude: settings.json present - not touched (merge by hand)"
+  return 0
+}
+
 # --- 4. --install: baseline CLI tools --------------------------------------
 # Most are already in Omarchy. zsh/vim only if you opt in.
 BASELINE=(git curl jq tmux ripgrep fd bat eza zoxide fzf stow neovim mise)
@@ -375,6 +426,7 @@ main(){
   link_local_plugins
   omarchy_idle_off
   link_omarchy_branding
+  link_claude
   if (( DO_INSTALL ));     then install_tools;   fi
   if (( DO_STOW ));        then stow_pkgs;       fi
   if (( DO_UNSTOW_FZF ));  then unstow_fzf;      fi
